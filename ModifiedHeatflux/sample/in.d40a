@@ -1,0 +1,104 @@
+# Diamond 6x6x40 crystal
+
+variable  nstep equal 20000000
+variable  cyct  equal 1000
+variable  cycd  equal 10000
+variable  cycj  equal 10
+
+units		metal
+boundary	p p p
+
+atom_style	atomic
+
+#read_restart  airbn03_res.20000000
+read_data data.airbn03
+
+timestep	0.0001
+
+variable pot_dir string "/home/MHa/MHa024/lammps-11Aug17/potentials"
+pair_style airebo 3.0 1 1
+pair_coeff * * ${pot_dir}/CH.airebo C
+
+neighbor	0.8 bin  #with delay 10 every 1 by default
+
+reset_timestep 0
+
+fix fnve all nve
+#fix fnvt all nvt temp 300.0 300.0 1.0
+
+## NEMD condition
+variable h  equal 7.134
+variable z1 equal $h
+variable zc equal 0.5*lz
+variable z2 equal ${zc}-$h
+variable z3 equal ${zc}+$h
+variable z4 equal zhi-$h
+region rhotleft block INF INF INF INF INF ${z1}
+region rhotright block INF INF INF INF ${z4} INF
+region rhot union 2 rhotleft rhotright
+region rcld block INF INF INF INF ${z2} ${z3}
+variable  to_metal equal 6.24151e-08 #MW/m^2 in eV/ps/angst^2
+variable Jz equal 10000.0*${to_metal}
+variable F equal ${Jz}*lx*ly*2.0
+fix fhot all ehex 1  ${F} region rhot
+fix fcld all ehex 1 -${F} region rcld
+
+## Control volume
+variable z5 equal lz/4.0-3.0*$h
+variable z6 equal lz/4.0+3.0*$h
+variable z7 equal lz*3.0/4.0-3.0*$h
+variable z8 equal lz*3.0/4.0+3.0*$h
+region scv1 block INF INF INF INF ${z5} ${z6}
+region scv2 block INF INF INF INF ${z7} ${z8}
+group cvatm1 dynamic all region scv1 every 1
+group cvatm2 dynamic all region scv2 every 1
+variable cvvol equal lx*ly*(${z6}-${z5})
+
+print """
+--- Additional Settings info. ---
+CV: ${z5}-${z6}, ${z7}-${z8}
+H: ${z4}-${z1}
+C: ${z2}-${z3}
+"""
+
+### Heat flux computation (only 1st CV)
+compute ke1 cvatm1 ke/atom
+compute pe1 cvatm1 pe/atom
+compute ss1 cvatm1 stress/atom NULL pair
+compute ke2 cvatm2 ke/atom
+compute pe2 cvatm2 pe/atom
+compute ss2 cvatm2 stress/atom NULL pair
+
+compute JVtot1 all heat/flux ke1  pe1  ss1
+compute JVtot2 all heat/flux ke2  pe2  ss2
+
+variable Jtot1x equal  c_JVtot1[1]/${cvvol}/${to_metal}
+variable Jtot1y equal  c_JVtot1[2]/${cvvol}/${to_metal}
+variable Jtot1z equal  c_JVtot1[3]/${cvvol}/${to_metal}
+variable Jtot2x equal -c_JVtot2[1]/${cvvol}/${to_metal}
+variable Jtot2y equal -c_JVtot2[2]/${cvvol}/${to_metal}
+variable Jtot2z equal -c_JVtot2[3]/${cvvol}/${to_metal}
+
+# log output
+thermo		${cyct}
+thermo_style custom step temp pe etotal press
+
+# Jz output
+variable ns equal step
+fix fpr all print ${cycj} "${ns}	${Jtot1x}	${Jtot1y}	${Jtot1z}	${Jtot2x}	${Jtot2y}	${Jtot2z}" file jdecomp.dat screen no title "step	Jtot1x	Jtot1y	Jtot1z	Jtot2x	Jtot2y	Jtot2z"
+
+#output mol file at 0 step
+dump dxyz all xyz 1 out.xyz
+dump_modify dxyz element C
+dump_modify dxyz sort id
+run 0
+undump dxyz
+
+#output mol files
+dump        ddcd all dcd ${cycd} out.dcd
+dump_modify ddcd unwrap no 
+
+restart ${nstep} res
+
+#execution
+run	${nstep}
