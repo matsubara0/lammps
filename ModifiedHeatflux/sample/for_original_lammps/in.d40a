@@ -1,4 +1,4 @@
-# Diamond 6x6x40 crystal using compute stress/atom/local
+# Diamond 6x6x40 crystal
 
 variable  nstep equal 20000000
 variable  cyct  equal 1000
@@ -10,16 +10,16 @@ boundary	p p p
 
 atom_style	atomic
 
-#read_restart airbn03_res.20000000
+#read_restart  airbn03_res.20000000
 read_data data.airbn03
 
 timestep	0.0001
 
-variable pot_dir string "/home/matsubara/lammps-7Aug19/potentials"
+variable pot_dir string "/home/matsubara/lammps-11Aug17/potentials"
 pair_style airebo 3.0 1 1
 pair_coeff * * ${pot_dir}/CH.airebo C
 
-neighbor	0.8 bin
+neighbor	0.8 bin  #with delay 10 every 1 by default
 
 reset_timestep 0
 
@@ -61,16 +61,12 @@ C: ${z2}-${z3}
 """
 
 ### Heat flux computation
-# - Note that a control volume can be finite only in the z direction.
-# - The group for stress/atom/local should be "all"
-#   because some atom pair that are not contained can contribute
-#   if their interactions cross the control volume.
 compute ke1 cvatm1 ke/atom
 compute pe1 cvatm1 pe/atom
-compute ss1 all    stress/atom/local scv1 NULL pair
+compute ss1 cvatm1 stress/atom NULL pair
 compute ke2 cvatm2 ke/atom
 compute pe2 cvatm2 pe/atom
-compute ss2 all    stress/atom/local scv2 NULL pair
+compute ss2 cvatm2 stress/atom NULL pair
 
 compute JVtot1 all heat/flux ke1  pe1  ss1
 compute JVtot2 all heat/flux ke2  pe2  ss2

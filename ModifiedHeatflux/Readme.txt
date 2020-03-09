@@ -1,4 +1,4 @@
-Nov. 2, 2019  Hiroki Matsubara
+Mar. 9, 2020 Hiroki Matsubara
 
 This folder includes the modified source codes of lammps to compute heat flux vector that satisfies energy conservation. For details, please refer to : H. Matsubara, G. Kikugawa, T. Bessho, T. Ohara, Diamond & Related Materials (under review).
 
@@ -14,11 +14,23 @@ This folder includes the modified source codes of lammps to compute heat flux ve
 Use of this code is at your sole risk. Anyone can use these codes, but you must be careful because the current version of the modified codes are not designed for general use. Source codes are provided "as is" with no warranties or guarantees.
 
 3) How to Use
-3-1)Our code assumes to be used with the lammps version lammps-7Aug19,
-and supports pair/airebo, pair/tersoff, and pair/lj/cut only. Use of any other potential type (including angle, dihedral, and pair/hybrid etc.) can cause a significant error. 
-3-2)The direction of heat flux must be in the z direction only.
-3-3)Please do not use 'compute stress/atom' if 'compute stress/atom/local' is being used.
-3-4)To install the codes, just copy the source (*.cpp) and header (*.h) files in the lammps source directory as:
+
+3-1)Our code assumes to be used with the lammps version lammps-7Aug19, and supports pair/airebo, pair/tersoff, and pair/lj/cut only. Use of any other potential type (including angle, dihedral, and pair/hybrid etc.) can cause a significant error.
+
+3-2) In the input file, use compute stress/atom/local insted of compute stress/atom as below.
+
+ region cv block INF INF INF INF ${z1} ${z2}
+ group cvatom dynamic all region ${cv} every 1
+ compute mystress all stress/atom/local ${cv} NULL pair
+
+Here, we assume that heat flux of region ${cv} is mesasrued.
+The group for stress/atom/local should be "all" because some atom pair that are not contained can contribute if their interactions cross the control volume.
+
+3-3) The heat flux can be measured in all directions, but the control volume can be finite only in the z direction.
+
+3-4)Please do not use 'compute stress/atom' if 'compute stress/atom/local' is being used.
+
+3-5)To install the codes, just copy the source (*.cpp) and header (*.h) files in the lammps source directory as:
 
  cp modified_source/{*.cpp,*.h} lammps-7Aug19/src
  
