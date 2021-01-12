@@ -1,4 +1,4 @@
-Mar. 9, 2020 Hiroki Matsubara
+Jan. 12, 2021 Hiroki Matsubara
 
 This folder includes the modified source codes of lammps to compute heat flux vector that satisfies energy conservation. For details, please refer to : H. Matsubara, G. Kikugawa, T. Bessho, T. Ohara, Diamond & Related Materials (under review).
 
@@ -30,11 +30,13 @@ The group for stress/atom/local should be "all" because some atom pair that are 
 
 3-4)Please do not use 'compute stress/atom' if 'compute stress/atom/local' is being used.
 
-3-5)To install the codes, just copy the source (*.cpp) and header (*.h) files in the lammps source directory as:
+3-5)To install the codes, just copy the source (*.cpp) and header (*.h) files in the lammps source directory and replace tersoff.* and airebo.* in MANYBODY package as:
 
  cp modified_source/{*.cpp,*.h} lammps-7Aug19/src
+ cp modified_source/{tersoff.*,airebo.*} lammps-7Aug19/src/MANYBODY
  
 Then, make as usual. Note that this will overwirte some of the original lammps codes. The following commands recovers the original lammps codes.
  
  cp original_source/{*.cpp,*.h} lammps-7Aug19/src
+ cp origianl_source/{tersoff.*,airebo.*} lammps-7Aug19/src/MANYBODY
  rm lammps-7Aug19/src/{compute_stress_atom_local.*,control_volume.*}
