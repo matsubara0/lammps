@@ -23,14 +23,16 @@ Use of this code is at your sole risk. Anyone can use these codes, but you must 
  group cvatom dynamic all region cv every 1
  compute mystress all stress/atom/local cv NULL pair
 
-Here, we assume that the average heat flux of a control volume 'cv' is mesasrued. Only one such control volume can be defined in a single lammps input file.
+Here, we assume that the average heat flux of a control volume 'cv' is mesasrued.
 The group for stress/atom/local should be "all" because atoms outside cv can contribute to the heat flux if their interactions cross cv.
 
-3-3) The heat flux can be measured in all directions, but the control volume can be finite only in the z direction.
+3-3)The number of such control volumes, ncvs, is limited to ncvs=1 or 2 (Even nves=0 may cause an error).
 
-3-4)Please do not use 'compute stress/atom' if 'compute stress/atom/local' is being used.
+3-4)The heat flux can be measured in all directions, but the control volume can be finite only in the z direction.
 
-3-5)To install the codes, just copy the source (*.cpp) and header (*.h) files in the lammps source directory and replace tersoff.* and airebo.* in MANYBODY package as:
+3-5)Please do not use 'compute stress/atom' if 'compute stress/atom/local' is being used.
+
+3-6)To install the codes, just copy the source (*.cpp) and header (*.h) files in the lammps source directory and replace tersoff.* and airebo.* in MANYBODY package as:
 
  cp modified_source/{*.cpp,*.h} lammps-7Aug19/src
  cp modified_source/{tersoff.*,airebo.*} lammps-7Aug19/src/MANYBODY
