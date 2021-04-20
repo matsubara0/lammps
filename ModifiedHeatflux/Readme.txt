@@ -20,11 +20,11 @@ Use of this code is at your sole risk. Anyone can use these codes, but you must 
 3-2) In the input file, use compute stress/atom/local insted of compute stress/atom as below.
 
  region cv block INF INF INF INF ${z1} ${z2}
- group cvatom dynamic all region ${cv} every 1
- compute mystress all stress/atom/local ${cv} NULL pair
+ group cvatom dynamic all region cv every 1
+ compute mystress all stress/atom/local cv NULL pair
 
-Here, we assume that heat flux of region ${cv} is mesasrued.
-The group for stress/atom/local should be "all" because some atom pair that are not contained can contribute if their interactions cross the control volume.
+Here, we assume that the average heat flux of a control volume 'cv' is mesasrued. Only one such control volume can be defined in a single lammps input file.
+The group for stress/atom/local should be "all" because atoms outside cv can contribute to the heat flux if their interactions cross cv.
 
 3-3) The heat flux can be measured in all directions, but the control volume can be finite only in the z direction.
 
