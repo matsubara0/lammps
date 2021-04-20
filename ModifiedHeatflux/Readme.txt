@@ -1,4 +1,4 @@
-Jan. 12, 2021 Hiroki Matsubara
+Apr. 20, 2021 Hiroki Matsubara
 
 This folder includes the modified source codes of lammps to compute heat flux vector that satisfies energy conservation. For details, please refer to : H. Matsubara, G. Kikugawa, T. Bessho, T. Ohara, Diamond & Related Materials (under review).
 
